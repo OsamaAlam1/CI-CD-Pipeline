@@ -1,0 +1,13 @@
+.text-input-container {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.text-input-container:hover {
+  border-color: #0B74D1 !important;
+}
+
+.text-input-container:focus-within {
+  border-color: #0B74D1 !important;
+  box-shadow: 0 0 0 3px rgba(11, 116, 209, 0.1) !important;
+}
+

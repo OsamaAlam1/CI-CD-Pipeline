@@ -1,0 +1,13 @@
+.select-container {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.select-container:hover {
+  border-color: #0B74D1 !important;
+}
+
+.select-container:focus-within {
+  border-color: #0B74D1 !important;
+  box-shadow: 0 0 0 3px rgba(11, 116, 209, 0.1) !important;
+}
+
