@@ -1,0 +1,19 @@
+# Render Blueprint Configuration
+# This file helps Render automatically configure your backend service
+
+services:
+  - type: web
+    name: ali-maternity-clinic-backend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    # Add these in Render dashboard after creation:
+    # MONGO_URI - Your MongoDB Atlas connection string
+    # JWT_SECRET - A strong random string
+    # JWT_EXPIRES_IN - 7d
+
