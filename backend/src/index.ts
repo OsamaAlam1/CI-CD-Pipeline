@@ -26,7 +26,7 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/users', userRoutes);
 
 // MongoDB connection (you can change the URI later)
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/ali_maternity_clinic';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://mongo:27017/mydb';
 
 async function startServer() {
   try {
