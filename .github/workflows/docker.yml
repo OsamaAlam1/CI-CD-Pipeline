@@ -26,4 +26,4 @@ jobs:
         run: docker build -t osamaalam1/my-app ./backend
 
       - name: Push Docker Image
-        run: docker push osamaalam1/my-app
+        run: docker push osamaalam12/my-app
