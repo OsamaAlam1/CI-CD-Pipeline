@@ -95,5 +95,5 @@ jobs:
             docker run -d \
               --name frontend \
               --network my-network \
-              -p 3000:80 \
+              -p 3000:3000 \
               ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_FRONTEND_REPO }}:latest
