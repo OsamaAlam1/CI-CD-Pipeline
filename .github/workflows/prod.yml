@@ -31,41 +31,33 @@ jobs:
       - name: Build Backend Docker Image
         run: |
           docker build -t backend:latest ./backend
+          docker tag backend:latest ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_BACKEND_REPO }}:latest
 
-      # 5️⃣ Tag Backend Docker Image for ECR
-      - name: Tag Backend Docker Image
+      # 5️⃣ Push Backend Docker Image to ECR
+      - name: Push Backend Image to ECR
         run: |
-          docker tag backend:latest ${{ steps.login-ecr.outputs.registry }}/backend:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_BACKEND_REPO }}:latest
 
-      # 6️⃣ Push Backend Docker Image to ECR
-      - name: Push Backend Docker Image to ECR
-        run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/backend:latest
-
-      # 7️⃣ Build Frontend Docker Image
+      # 6️⃣ Build Frontend Docker Image
       - name: Build Frontend Docker Image
         run: |
           docker build -t frontend:latest ./frontend
+          docker tag frontend:latest ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_FRONTEND_REPO }}:latest
 
-      # 8️⃣ Tag Frontend Docker Image for ECR
-      - name: Tag Frontend Docker Image
+      # 7️⃣ Push Frontend Docker Image to ECR
+      - name: Push Frontend Image to ECR
         run: |
-          docker tag frontend:latest ${{ steps.login-ecr.outputs.registry }}/frontend:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_FRONTEND_REPO }}:latest
 
-      # 9️⃣ Push Frontend Docker Image to ECR
-      - name: Push Frontend Docker Image to ECR
-        run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/frontend:latest
-
-      # 🔟 Deploy Backend + MongoDB on EC2 via SSH
-      - name: Deploy to EC2
+      # 8️⃣ Deploy to EC2 via SSH
+      - name: Deploy Backend + Frontend + MongoDB on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Create Docker network
+            # Create Docker network if not exists
             docker network inspect my-network >/dev/null 2>&1 || docker network create my-network
 
             # Run MongoDB container if not running
@@ -78,30 +70,30 @@ jobs:
             fi
 
             # Pull latest backend image
-            docker pull ${{ steps.login-ecr.outputs.registry }}/backend:latest
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_BACKEND_REPO }}:latest
 
             # Stop old backend container if exists
-            docker stop my-app || true
-            docker rm my-app || true
+            docker stop backend || true
+            docker rm backend || true
 
-            # Run new backend container on same network
+            # Run backend container
             docker run -d \
-              --name my-app \
+              --name backend \
               --network my-network \
               -p 5000:5000 \
               -e MONGO_URI="mongodb://mongo:27017/mydb" \
-              ${{ steps.login-ecr.outputs.registry }}/backend:latest
+              ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_BACKEND_REPO }}:latest
 
             # Pull latest frontend image
-            docker pull ${{ steps.login-ecr.outputs.registry }}/frontend:latest
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_FRONTEND_REPO }}:latest
 
             # Stop old frontend container if exists
-            docker stop my-frontend || true
-            docker rm my-frontend || true
+            docker stop frontend || true
+            docker rm frontend || true
 
-            # Run new frontend container on same network
+            # Run frontend container
             docker run -d \
-              --name my-frontend \
+              --name frontend \
               --network my-network \
-              -p 80:3000 \
-              ${{ steps.login-ecr.outputs.registry }}/frontend:latest
+              -p 3000:80 \
+              ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_FRONTEND_REPO }}:latest
